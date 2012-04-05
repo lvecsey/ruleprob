@@ -7,6 +7,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <netdb.h>
+
 #include <errno.h>
 #include <string.h>
 #include <time.h>
@@ -44,14 +46,44 @@ int main(int argc, char *argv[]) {
 
   int retval;
 
+  struct addrinfo hints;
+
+  struct addrinfo *res;
+
   if (cmd_string == NULL || server_no < 0) {
     fprintf(stderr, "%s: Usage: rp-send [turnon|turnoff] server_no ipv6_address\n", __FUNCTION__);
     return -1;
   }
 
   if (ipv6_address_string!=NULL) {
-    retval = sscanf(ipv6_address, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", ipv6_address, ipv6_address+1, ipv6_address+2, ipv6_address+3, ipv6_address+4, ipv6_address+5, ipv6_address+6, ipv6_address+7, ipv6_address+8, ipv6_address+9, ipv6_address+10, ipv6_address+11, ipv6_address+12, ipv6_address+13, ipv6_address+14, ipv6_address+15);
-    printf("%s: ipv6 address conversion (sscanf) returned %d.\n", __FUNCTION__, retval);
+
+    struct addrinfo *rp;
+
+    hints.ai_flags = 0;
+    hints.ai_family = AF_INET6;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_protocol = 17;
+    hints.ai_addrlen = 0;
+    hints.ai_addr = NULL;
+    hints.ai_canonname = NULL;
+    hints.ai_next = NULL;
+
+    retval = getaddrinfo(ipv6_address_string, NULL, &hints, &res);
+    
+    if (retval != 0) {
+      fprintf(stderr, "%s: Trouble with call to getaddrinfo.\n", __FUNCTION__);
+      fprintf(stderr, "%s: gai_strerror = %s\n", __FUNCTION__, gai_strerror(retval));
+      return -1;
+    }
+
+    for (rp = res; rp != NULL; rp = rp->ai_next) {
+
+      memcpy(ipv6_address, ((char*) rp->ai_addr) + 8, sizeof(ipv6_address));
+
+      break;
+
+    }
+
   }
   else {
     fprintf(stderr, "%s: Please specify an ipv6 address.\n", __FUNCTION__);
