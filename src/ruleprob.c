@@ -29,7 +29,7 @@ int action_call(char *cmd_string, u_int64_t server_no, float probability) {
 
   int retval;
 
-  sprintf(string, "./iptables-script.sh %s %lu %f", cmd_string, server_no, probability);
+  sprintf(string, "./iptables-script.sh %s %lu %0.1f", cmd_string, server_no, probability);
 
   retval = system(string);
 
@@ -112,13 +112,13 @@ int main(int argc, char *argv[]) {
 
 	if (server_no == 1) {
 
-	  probability = (cmd == cmd_turnon) ? 1.0 : 0.0;
+	  probability = (cmd == cmd_turnon) ? 1.0f : 0.0f;
 
 	}
 
 	if (server_no == 0) {
 
-	  probability = (servers[1].availability == changed_online) ? 0.5 : 1.0;
+	  probability = (servers[1].availability == changed_online) ? 0.5f : 1.0f;
 
 	}
 
@@ -130,13 +130,13 @@ int main(int argc, char *argv[]) {
 
 	if (cmd == cmd_turnoff && server_no == 1 && servers[0].availability == changed_online) {
 
-	  action_call("turnon", 0, 1.0);
+	  action_call("turnon", 0, 1.0f);
 
 	}
 
 	if (cmd == cmd_turnon && server_no == 1 && servers[0].availability == changed_online) {
 
-	  action_call("turnon", 0, 0.5);
+	  action_call("turnon", 0, 0.5f);
 
 	}
 
