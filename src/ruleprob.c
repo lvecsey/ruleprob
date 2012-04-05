@@ -15,10 +15,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+
 #include "ruleprob.h"
 
-u_int64_t cmd_turnon = 0x20485041;
-u_int64_t cmd_turnoff = 0x20485240;
+#include "cmd_magic.h"
 
 int main(int argc, char *argv[]) {
 
@@ -82,13 +85,7 @@ int main(int argc, char *argv[]) {
       memcpy(&cmd, packet, sizeof(u_int64_t));
       memcpy(&server_no, packet + sizeof(u_int64_t), sizeof(u_int64_t));
 
-      packet[0] = 's';
       clock_gettime(CLOCK_REALTIME, &ts);
-
-      packet[0] = 3;
-      packet[1] = 78;
-      packet[2] = 9;
-      packet[3] = 5;
 
       printf("%s: Received packet, length=%d\n", __FUNCTION__, r);
 
@@ -100,13 +97,15 @@ int main(int argc, char *argv[]) {
 
 	retval = system(string);
 
-	printf("%s: System command for cmd=%s server_no=%lu returned %d.\n", __FUNCTION__, cmd_string, server_no);
+	printf("%s: System command for cmd=%s server_no=%lu returned %d.\n", __FUNCTION__, cmd_string, server_no, retval);
 
       }
 
     }
+
   }
 
+  close(s);
 
   return 0;
 

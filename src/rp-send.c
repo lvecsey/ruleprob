@@ -13,6 +13,8 @@
 
 #include "show_address.h"
 
+#include "cmd_magic.h"
+
 int main(int argc, char *argv[]) {
 
   int len;
@@ -22,7 +24,7 @@ int main(int argc, char *argv[]) {
   struct sockaddr_in6 sa6;
   int s;
 
-  unsigned short destination_port = 9750;
+  unsigned short destination_port = 4985;
 
   unsigned short ns_destination_port;
 
@@ -38,7 +40,7 @@ int main(int argc, char *argv[]) {
 
   struct timespec ts;
 
-  u_int64_t cmd;
+  u_int64_t cmd = 0;
 
   int retval;
 
@@ -53,6 +55,14 @@ int main(int argc, char *argv[]) {
   }
   else {
     fprintf(stderr, "%s: Please specify an ipv6 address.\n", __FUNCTION__);
+    return -1;
+  }
+
+  if (!strncmp(cmd_string, "turnon", 6)) cmd = cmd_turnon;
+  if (!strncmp(cmd_string, "turnoff", 7)) cmd = cmd_turnoff;
+
+  if (cmd != cmd_turnon && cmd != cmd_turnoff) {
+    fprintf(stderr, "%s: Must specify either turnon or turnoff.\n", __FUNCTION__);
     return -1;
   }
 
