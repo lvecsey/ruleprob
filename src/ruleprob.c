@@ -110,7 +110,11 @@ int main(int argc, char *argv[]) {
 
 	char *cmd_string = cmd == cmd_turnon ? "turnon" : "turnoff";
 
-	if (server_no == 1) probability = 1.0;
+	if (server_no == 1) {
+
+	  probability = (cmd == cmd_turnon) ? 1.0 : 0.0;
+
+	}
 
 	if (server_no == 0) {
 
