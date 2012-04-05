@@ -23,6 +23,22 @@
 
 #include "cmd_magic.h"
 
+int action_call(char *cmd_string, u_int64_t server_no, float probability) {
+
+  char string[80];
+
+  int retval;
+
+  sprintf(string, "./iptables-script.sh %s %lu %f", cmd_string, server_no, probability);
+
+  retval = system(string);
+
+  printf("%s: System command for cmd=%s server_no=%lu probability=%f returned %d.\n", __FUNCTION__, cmd_string, server_no, probability, retval);
+
+  return 0;
+
+}
+
 int main(int argc, char *argv[]) {
 
   unsigned char packet[256];
@@ -47,9 +63,7 @@ int main(int argc, char *argv[]) {
 
   u_int64_t cmd, server_no;
 
-  char string[80];
-
-  int retval;
+  float probability = 0.5;
 
   s = socket(AF_INET6,SOCK_DGRAM,0);
   if (s == -1) {
@@ -66,6 +80,9 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "%s: Shell is not available.\n", __FUNCTION__);
     return -1;
   }
+
+  servers[0].availability = remained_offline;
+  servers[1].availability = remained_offline;
 
   memset(&sa6,0,sizeof(sa6));
   ns_listen_port = htons(listen_port);
@@ -93,11 +110,31 @@ int main(int argc, char *argv[]) {
 
 	char *cmd_string = cmd == cmd_turnon ? "turnon" : "turnoff";
 
-	sprintf(string, "./iptables-script.sh %s %lu", cmd_string, server_no);
+	if (server_no == 1) probability = 1.0;
 
-	retval = system(string);
+	if (server_no == 0) {
 
-	printf("%s: System command for cmd=%s server_no=%lu returned %d.\n", __FUNCTION__, cmd_string, server_no, retval);
+	  probability = (servers[1].availability == changed_online) ? 0.5 : 1.0;
+
+	}
+
+	action_call(cmd_string, server_no, probability);
+
+	if (server_no < num_servers) {
+	  servers[server_no].availability = (cmd == cmd_turnon) ? changed_online : changed_offline;
+	}
+
+	if (cmd == cmd_turnoff && server_no == 1 && servers[0].availability == changed_online) {
+
+	  action_call("turnon", 0, 1.0);
+
+	}
+
+	if (cmd == cmd_turnon && server_no == 1 && servers[0].availability == changed_online) {
+
+	  action_call("turnon", 0, 0.5);
+
+	}
 
       }
 
