@@ -63,9 +63,9 @@ int main(int argc, char *argv[]) {
 
   struct timespec ts;
 
-  u_int64_t cmd, server_no;
+  u_int32_t cmd, server_no;
 
-  u_int64_t cmd_be64, server_no_be64;
+  u_int32_t cmd_be32, server_no_be32;
 
   float probability = 0.5;
 
@@ -101,13 +101,13 @@ int main(int argc, char *argv[]) {
   for (;;) {
     len = sizeof(sa6);
     r = recvfrom(s,packet,sizeof packet,0,(struct sockaddr *) &sa6,&len);
-    if (r >= sizeof(u_int64_t) * 2) {
+    if (r >= sizeof(u_int32_t) * 2) {
 
-      memcpy(&cmd_be64, packet, sizeof(u_int64_t));
-      memcpy(&server_no_be64, packet + sizeof(u_int64_t), sizeof(u_int64_t));
+      memcpy(&cmd_be32, packet, sizeof(u_int32_t));
+      memcpy(&server_no_be32, packet + sizeof(u_int32_t), sizeof(u_int32_t));
 
-      cmd = be64toh(cmd_be64);
-      server_no = be64toh(server_no_be64);
+      cmd = ntohl(cmd_be32);
+      server_no = ntohl(server_no_be32);
 
       clock_gettime(CLOCK_REALTIME, &ts);
 

@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 
   u_int64_t sn;
 
-  u_int64_t cmd_be64, sn_be64;
+  u_int64_t cmd_be32, sn_be32;
 
   int retval;
 
@@ -128,15 +128,15 @@ int main(int argc, char *argv[]) {
 
   sn = server_no;
 
-  cmd_be64 = htobe64(cmd);
-  sn_be64 = htobe64(sn);
+  cmd_be32 = htonl(cmd);
+  sn_be32 = htonl(sn);
 
-  memcpy(packet, &cmd_be64, sizeof(u_int64_t));
-  memcpy(packet + sizeof(u_int64_t), &sn_be64, sizeof(u_int64_t));
+  memcpy(packet, &cmd_be32, sizeof(u_int32_t));
+  memcpy(packet + sizeof(u_int32_t), &sn_be32, sizeof(u_int32_t));
 
   memcpy(packet + sizeof(u_int64_t) * 2, &ts, sizeof(struct timespec));
 
-  r = sizeof(u_int64_t) * 2 + sizeof(struct timespec);
+  r = sizeof(u_int32_t) * 2 + sizeof(struct timespec);
 
   show_address(ipv6_address);
 
