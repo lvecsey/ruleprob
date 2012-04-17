@@ -15,6 +15,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <endian.h>
+
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -63,6 +65,8 @@ int main(int argc, char *argv[]) {
 
   u_int64_t cmd, server_no;
 
+  u_int64_t cmd_be64, server_no_be64;
+
   float probability = 0.5;
 
   s = socket(AF_INET6,SOCK_DGRAM,0);
@@ -99,8 +103,11 @@ int main(int argc, char *argv[]) {
     r = recvfrom(s,packet,sizeof packet,0,(struct sockaddr *) &sa6,&len);
     if (r >= sizeof(u_int64_t) * 2) {
 
-      memcpy(&cmd, packet, sizeof(u_int64_t));
-      memcpy(&server_no, packet + sizeof(u_int64_t), sizeof(u_int64_t));
+      memcpy(&cmd_be64, packet, sizeof(u_int64_t));
+      memcpy(&server_no_be64, packet + sizeof(u_int64_t), sizeof(u_int64_t));
+
+      cmd = be64toh(cmd_be64);
+      server_no = be64toh(server_no_be64);
 
       clock_gettime(CLOCK_REALTIME, &ts);
 

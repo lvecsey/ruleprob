@@ -7,6 +7,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <endian.h>
+
 #include <netdb.h>
 
 #include <errno.h>
@@ -43,6 +45,10 @@ int main(int argc, char *argv[]) {
   struct timespec ts;
 
   u_int64_t cmd = 0;
+
+  u_int64_t sn;
+
+  u_int64_t cmd_be64, sn_be64;
 
   int retval;
 
@@ -120,8 +126,13 @@ int main(int argc, char *argv[]) {
   
   clock_gettime(CLOCK_REALTIME, &ts);
 
-  memcpy(packet, &cmd, sizeof(u_int64_t));
-  memcpy(packet + sizeof(u_int64_t), &server_no, sizeof(u_int64_t));
+  sn = server_no;
+
+  cmd_be64 = htobe64(cmd);
+  sn_be64 = htobe64(sn);
+
+  memcpy(packet, &cmd_be64, sizeof(u_int64_t));
+  memcpy(packet + sizeof(u_int64_t), &sn_be64, sizeof(u_int64_t));
 
   memcpy(packet + sizeof(u_int64_t) * 2, &ts, sizeof(struct timespec));
 
