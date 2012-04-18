@@ -25,17 +25,21 @@
 
 #include "cmd_magic.h"
 
-int action_call(char *cmd_string, u_int64_t server_no, float probability) {
+typedef u_int32_t sn_t;
+
+int action_call(char *cmd_string, sn_t server_no, float probability) {
 
   char string[80];
 
   int retval;
 
-  sprintf(string, "./iptables-script.sh %s %lu %0.1f", cmd_string, server_no, probability);
+  sprintf(string, "./iptables-script.sh %s %u %0.1f", cmd_string, server_no, probability);
 
   retval = system(string);
 
-  printf("%s: System command for cmd=%s server_no=%lu probability=%f returned %d.\n", __FUNCTION__, cmd_string, server_no, probability, retval);
+  printf("%s: System command for cmd=%s server_no=%u probability=%f returned %d.\n", __FUNCTION__, cmd_string, server_no, probability, retval);
+
+  fflush(stdout);
 
   return 0;
 
@@ -53,7 +57,7 @@ int main(int argc, char *argv[]) {
 
   scriptrule_t *servers = malloc(sizeof(scriptrule_t) * num_servers); 
 
-  int len;
+  socklen_t len;
 
   int r;
 
@@ -63,9 +67,13 @@ int main(int argc, char *argv[]) {
 
   struct timespec ts;
 
-  u_int32_t cmd, server_no;
+  u_int32_t cmd;
 
-  u_int32_t cmd_be32, server_no_be32;
+  sn_t server_no;
+
+  u_int32_t cmd_be32;
+
+  sn_t server_no_be32;
 
   float probability = 0.5;
 
