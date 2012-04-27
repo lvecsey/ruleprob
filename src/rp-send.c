@@ -56,6 +56,8 @@ int main(int argc, char *argv[]) {
 
   struct addrinfo *res;
 
+  int close_retval;
+
   if (cmd_string == NULL || server_no < 0) {
     fprintf(stderr, "%s: Usage: rp-send [turnon|turnoff] server_no ipv6_address\n", __FUNCTION__);
     return -1;
@@ -143,6 +145,12 @@ int main(int argc, char *argv[]) {
   sendto_retval = sendto(s,packet,r,0,(const struct sockaddr *) &sa6,len);
   if (sendto_retval==-1) {
     perror("sendto");
+    return -1;
+  }
+
+  close_retval = close(s);
+  if (close_retval==-1) {
+    fprintf(stderr, "%s: Expected clean socket close and got retval=%d.\n", __FUNCTION__, close_retval);
     return -1;
   }
 
